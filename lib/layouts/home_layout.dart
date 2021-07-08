@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:sqflite/sqflite.dart';
 import 'package:udemy_mansur/modules/archived_screen.dart';
 import 'package:udemy_mansur/modules/done_screen.dart';
@@ -30,11 +32,12 @@ class _HomeLayoutState extends State<HomeLayout> {
 
   late Database dataBase;
   var scaffoldKey = GlobalKey<ScaffoldState>();
+  var formKey = GlobalKey<FormState>();
   bool isBottomSheetShown = false;
   IconData fabIcon = Icons.edit;
   var titleController = TextEditingController();
   var timeController = TextEditingController();
-  String? _selectedTime;
+  var dateController = TextEditingController();
 
   @override
   void initState() {
@@ -56,69 +59,122 @@ class _HomeLayoutState extends State<HomeLayout> {
       floatingActionButton: FloatingActionButton(
         onPressed:  ()
         {
-          if(isBottomSheetShown){
-            Navigator.pop(context);
-            isBottomSheetShown = false;
-            setState(() {
-              fabIcon = Icons.edit;
-            });
+          if(isBottomSheetShown)
+          {
+            if(formKey.currentState!.validate())
+            {
+              insertToDataBase(
+                date: dateController.text,
+                time: timeController.text,
+                title: titleController.text,
+              ).then((value)
+              {
+                Navigator.pop(context);
+                isBottomSheetShown = false;
+                setState(() {
+                  fabIcon = Icons.edit;
+                });
+              });
+            }
+
           }else{
             scaffoldKey.currentState!.showBottomSheet(
                     (context) => Container(
-                      color: Colors.grey[100],
+                      color: Colors.white,
                       padding: EdgeInsets.all(20),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          defaultTextFromField(
-                              controller: titleController,
-                              type: TextInputType.text,
-                              label: 'Title Task',
-                              prefix: Icons.title,
-                              validate: (String? value){
-                                if (value!.isEmpty)
-                                {
-                                  return 'title must not be empty';
-                                }
-                                return null;
-                              },
-                              onChanged: (){return null;},
-                              onSubmit: (){return null;},
-                              onTap: (){return null;}
-                          ),
-                          SizedBox(
-                            height: 15,
-                          ),
-                          defaultTextFromField(
+                      child: Form(
+                        key: formKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            defaultTextFromField(
+                                controller: titleController,
+                                type: TextInputType.text,
+                                label: 'Title Task',
+                                prefix: Icons.title,
+                                validate: (String? value){
+                                  if (value!.isEmpty)
+                                  {
+                                    return 'title must not be empty';
+                                  }
+                                  return null;
+                                },
+                                onChanged: (){return null;},
+                                onSubmit: (){return null;},
+                            ),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            TextFormField(
                               controller: timeController,
-                              type: TextInputType.datetime,
-                              label: 'Time Task',
-                              prefix: Icons.watch_later_outlined,
+                              keyboardType: TextInputType.datetime,
+                              decoration: InputDecoration(
+                                labelText: 'Tasks Time',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.watch_later_outlined),
+                              ),
                               onTap: ()
-                              // => showTimePicker(context: context, initialTime:TimeOfDay.now()).then((value) {print(value!.format(context));}),
                               {
                                 // _show();
                                 showTimePicker(
                                   context: context,
                                   initialTime: TimeOfDay.now(),
                                 ).then((value) {
-                                  print(value!.format(context));
+                                  timeController.text = value!.format(context).toString();
+                                  print(value.format(context));
                                 });
                               },
-                              validate: (String? value){
+                              validator: (String? value){
                                 if (value!.isEmpty)
                                 {
                                   return ' time must not be empty';
                                 }
                                 return null;
                               },
-                              onChanged: (){return null;},
-                              onSubmit: (){return null;},
-                          )
-                        ],
+                            ),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            TextFormField(
+                              controller: dateController,
+                              keyboardType: TextInputType.datetime,
+                              decoration: InputDecoration(
+                                labelText: 'Tasks Date',
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.calendar_today),
+                              ),
+                              onTap: ()
+                              {
+                                showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    firstDate: DateTime.now(),
+                                    lastDate: DateTime.parse('2022-02-02')
+                                ).then((value)
+                                {
+                                  dateController.text= DateFormat.yMMMd().format(value!);
+                                });
+                              },
+                              validator: (String? value){
+                                if (value!.isEmpty)
+                                {
+                                  return ' date must not be empty';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
                       ),
-                    )
-            );
+                    ),
+              elevation: 20,
+            ).closed.then((value)
+            {
+              isBottomSheetShown = false;
+              setState(() {
+                fabIcon = Icons.edit;
+              });
+            });
             isBottomSheetShown = true;
             setState(() {
               fabIcon = Icons.add;
@@ -186,11 +242,15 @@ class _HomeLayoutState extends State<HomeLayout> {
    );
   }
 
-  void insertToDataBase ()
+  Future insertToDataBase ({
+  @required title,
+  @required time,
+  @required date,
+}) async
   {
-   dataBase.transaction((txn)
+   return await dataBase.transaction((txn)
    {
-     txn.rawInsert('INSERT INTO tasks(title,date,time,status) VALUES("first task","0222","855","new")').then((value){
+     txn.rawInsert('INSERT INTO tasks(title,date,time,status) VALUES("$title","$date","$time","new")').then((value){
        print('$value inserted successfully');
      } ).catchError((error){
        print('error when New record');
@@ -199,15 +259,4 @@ class _HomeLayoutState extends State<HomeLayout> {
      return null;
    });
   }
-
-  // Future<void> _show() async {
-  //   final TimeOfDay? result = await showTimePicker(
-  //       context: context, initialTime: TimeOfDay.now() );
-  //   if (result != null) {
-  //     setState(() {
-  //       _selectedTime = result.format(context);
-  //     });
-  //   }
-  // }
-
 }

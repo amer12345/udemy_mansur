@@ -25,7 +25,7 @@ Widget defaultTextFromField({
   @required TextInputType? type,
   Function? onChanged,
   Function? onSubmit,
-  Function? onTap,
+
   @required String? label,
   @required IconData? prefix,
    IconData? suffix,
@@ -46,6 +46,6 @@ Widget defaultTextFromField({
   keyboardType: type,
   onChanged: onChanged!(),
   onFieldSubmitted: onSubmit!(),
-  onTap: onTap!(),
+
   validator: validate,
 );
