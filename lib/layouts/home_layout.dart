@@ -39,6 +39,8 @@ class _HomeLayoutState extends State<HomeLayout> {
   var timeController = TextEditingController();
   var dateController = TextEditingController();
 
+  List<Map> tasks = [];
+
   @override
   void initState() {
     super.initState();
@@ -217,10 +219,10 @@ class _HomeLayoutState extends State<HomeLayout> {
     );
   }
 
-  Future <String>  getName() async
-  {
-    return ('Amer Kanjo');
-  }
+  // Future <String>  getName() async
+  // {
+  //   return ('Amer Kanjo');
+  // }
 
   void createDataBase () async
   {
@@ -236,6 +238,10 @@ class _HomeLayoutState extends State<HomeLayout> {
      },
      onOpen: (dataBase)
      {
+       getDataFromDatabase(dataBase).then((value)
+       {
+         tasks = value;
+       });
        print('DataBase opened');
 
      }
@@ -258,5 +264,11 @@ class _HomeLayoutState extends State<HomeLayout> {
      });
      return null;
    });
+  }
+
+
+  Future<List<Map>> getDataFromDatabase (dataBase) async
+  {
+     return  await dataBase.rawQuery('SELECT * FROM tasks');
   }
 }
