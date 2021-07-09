@@ -97,12 +97,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     }
                     return null;
                   },
-                  onChanged: (){
-                    return print('rrrr');
-                  },
-                  onSubmit: (){
-                    return print('');
-                  }
               ),
                   SizedBox(
                     height: 20,

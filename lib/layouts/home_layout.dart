@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:sqflite/sqflite.dart';
+import 'package:udemy_mansur/constance/constance.dart';
 import 'package:udemy_mansur/modules/archived_screen.dart';
 import 'package:udemy_mansur/modules/done_screen.dart';
 import 'package:udemy_mansur/modules/new_tasks_screen.dart';
@@ -39,7 +40,6 @@ class _HomeLayoutState extends State<HomeLayout> {
   var timeController = TextEditingController();
   var dateController = TextEditingController();
 
-  List<Map> tasks = [];
 
   @override
   void initState() {

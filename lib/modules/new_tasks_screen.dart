@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:udemy_mansur/constance/constance.dart';
 import 'package:udemy_mansur/shared/default_botten.dart';
 
 class NewTasksScreen extends StatelessWidget {
@@ -12,6 +13,6 @@ class NewTasksScreen extends StatelessWidget {
           height: 1,
           color: Colors.grey[300],
         ),
-        itemCount: 10);
+        itemCount: tasks.length);
   }
 }
